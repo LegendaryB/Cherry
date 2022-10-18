@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Text;
 using System;
+using System.Net.Mime;
 
 namespace Cherry.Extensions
 {
@@ -17,10 +18,15 @@ namespace Cherry.Extensions
             string body,
             HttpStatusCode statusCode)
         {
+            var bytes = Encoding.UTF8.GetBytes(body);
+
+            res.ContentEncoding = Encoding.UTF8;
+
             await AnswerWithStatusCodeAsync(
                 res,
-                Encoding.UTF8.GetBytes(body),
-                statusCode);
+                bytes,
+                statusCode,
+                MediaTypeNames.Text.Plain);
         }
 
         /// <summary>
@@ -31,9 +37,13 @@ namespace Cherry.Extensions
         public static async Task AnswerWithStatusCodeAsync(
             this HttpListenerResponse res, 
             byte[] body, 
-            HttpStatusCode statusCode)
+            HttpStatusCode statusCode,
+            string contentType = MediaTypeNames.Application.Octet)
         {
+            res.ContentType = contentType;
+            res.ContentLength64 = body.Length;
             res.StatusCode = (int)statusCode;
+
             await res.OutputStream.WriteAsync(body);
             res.Close();
         }
