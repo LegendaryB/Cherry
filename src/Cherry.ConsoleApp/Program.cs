@@ -9,20 +9,17 @@ namespace Cherry.ConsoleApp
 {
     public class Program
     {
-        static async Task Main(string[] args)
+        static async Task Main()
         {
-            var server = new HttpServer(NullLogger<HttpServer>.Instance, "http://localhost:8081/");
-            server.RegisterController<HelloWorldController>("/api");
-            server.AutoRegisterControllers();
-
-            // server.AutoRegisterControllers();
-
-            //server.RegisterHandlerForRoute("/api/test", async (ctx) =>
-            //{
-            //    await ctx.Response.AnswerWithStatusCodeAsync(
-            //        "Hello handler",
-            //        HttpStatusCode.OK);
-            //});
+            var server = new HttpServer(NullLogger<HttpServer>.Instance, "http://localhost:8081/")
+                .RegisterController<HelloWorldController>("/api/v1/helloworld")
+                .RegisterController<HelloWorldController>("/api/v2")
+                .RegisterController("/api/v3", async (ctx) =>
+                {
+                    await ctx.Response.AnswerWithStatusCodeAsync(
+                        "Hello handler",
+                        HttpStatusCode.OK);
+                });
 
             await server.RunAsync();
         }

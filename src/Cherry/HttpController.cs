@@ -20,7 +20,7 @@ namespace Cherry
         public virtual Task HandleDeleteAsync(HttpListenerContext ctx) =>
             SendDefaultResponse(ctx);
 
-        internal Task HandleAnyAsync(HttpListenerContext ctx)
+        internal virtual Task HandleAnyAsync(HttpListenerContext ctx)
         {
             if (ctx.Request.HttpMethod == HttpMethod.Post.ToString())
                 return HandlePostAsync(ctx);
@@ -38,7 +38,7 @@ namespace Cherry
             return SendDefaultResponse(ctx);
         }
 
-        private static Task SendDefaultResponse(HttpListenerContext ctx)
+        protected static Task SendDefaultResponse(HttpListenerContext ctx)
         {
             ctx.Response.AnswerWithStatusCode(HttpStatusCode.NotImplemented);
             return Task.CompletedTask;

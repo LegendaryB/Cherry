@@ -26,9 +26,7 @@ namespace Cherry.Routing
                 if (ctor == null)
                     continue;
 
-                var instance = Activator.CreateInstance(type) as HttpController;
-
-                if (instance == null)
+                if (Activator.CreateInstance(type) is not HttpController instance)
                     continue;
 
                 router.RegisterController(

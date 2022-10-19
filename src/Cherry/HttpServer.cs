@@ -33,6 +33,19 @@ namespace Cherry
             _httpListener.Prefixes.AddRange(prefixes.ToArray());
         }
 
+        public HttpServer RegisterController(
+            string path,
+            Func<HttpListenerContext, Task> handler,
+            bool overrideExistingRoute = false)
+        {
+            var controller = new FuncAsHttpController(handler);
+
+            return RegisterController(
+                path,
+                controller,
+                overrideExistingRoute);
+        }
+
         /// <summary>
         /// Allows to use a custom router implementation.
         /// </summary>
