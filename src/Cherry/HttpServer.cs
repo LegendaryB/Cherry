@@ -33,19 +33,6 @@ namespace Cherry
             _httpListener.Prefixes.AddRange(prefixes.ToArray());
         }
 
-        public HttpServer RegisterController(
-            string path,
-            Func<HttpListenerContext, Task> handler,
-            bool overrideExistingRoute = false)
-        {
-            var controller = new FuncAsHttpController(handler);
-
-            return RegisterController(
-                path,
-                controller,
-                overrideExistingRoute);
-        }
-
         /// <summary>
         /// Allows to use a custom router implementation.
         /// </summary>
@@ -68,18 +55,91 @@ namespace Cherry
         }
 
         /// <summary>
-        /// 
+        /// Constructs and registers a controller for the route declared with the <see cref="RouteAttribute"/>.
         /// </summary>
-        /// <typeparam name="TController"></typeparam>
-        /// <param name="route"></param>
-        /// <param name="overrideExistingRoute"></param>
-        /// <returns></returns>
+        /// <param name="overrideExistingRoute">Flag to indicate that a route (if already registered) should be overriden.</param>
+        /// <returns>The current <see cref="HttpServer"/> instance.</returns>
+        public HttpServer RegisterController<TController>(bool overrideExistingRoute = false)
+            where TController : HttpController, new()
+        {
+            var controller = new TController();
+
+            return RegisterController(
+                controller, 
+                overrideExistingRoute);
+        }
+
+        /// <summary>
+        /// Registers a controller and extracts the route from the declared <see cref="RouteAttribute"/>.
+        /// </summary>
+        /// <param name="controller">A instance which must be assignable to the type <see cref="HttpController"/>.</param>
+        /// <param name="overrideExistingRoute">Flag to indicate that a route (if already registered) should be overriden.</param>
+        /// <returns>The current <see cref="HttpServer"/> instance.</returns>
+        public HttpServer RegisterController<TController>(
+            TController controller,
+            bool overrideExistingRoute = false)
+
+            where TController : HttpController
+        {
+            var path = ControllerDiscovery.GetPathFromRouteAttribute(
+                typeof(TController));
+
+            if (string.IsNullOrWhiteSpace(path))
+                throw new InvalidOperationException($"Failed to resolve controller route!");
+
+            return RegisterController(
+                path,
+                controller,
+                overrideExistingRoute);
+        }
+
+        /// <summary>
+        /// Wraps a <see cref="Func{T, TResult}"/> into a (internal) controller class and registers it for the given route.
+        /// </summary>
+        /// <param name="route">The route which should be handled by the controller.</param>
+        /// <param name="handler">The <see cref="Func{T, TResult}"/> which should be wrapped into an (internal) controller class.</param>
+        /// <param name="overrideExistingRoute">Flag to indicate that a route (if already registered) should be overriden.</param>
+        /// <returns>The current <see cref="HttpServer"/> instance.</returns>
+        public HttpServer RegisterController(
+            string route,
+            Func<HttpListenerContext, Task> handler,
+            bool overrideExistingRoute = false)
+        {
+            if (string.IsNullOrWhiteSpace(route))
+            {
+                throw new ArgumentException($"'{nameof(route)}' cannot be null or whitespace.", nameof(route));
+            }
+
+            if (handler is null)
+            {
+                throw new ArgumentNullException(nameof(handler));
+            }
+
+            var controller = new FuncAsHttpController(handler);
+
+            return RegisterController(
+                route,
+                controller,
+                overrideExistingRoute);
+        }
+
+        /// <summary>
+        /// Constructs and registers a controller for the given route.
+        /// </summary>
+        /// <param name="route">The route which should be handled by the controller.</param>
+        /// <param name="overrideExistingRoute">Flag to indicate that a route (if already registered) should be overriden.</param>
+        /// <returns>The current <see cref="HttpServer"/> instance.</returns>
         public HttpServer RegisterController<TController>(
             string route,
             bool overrideExistingRoute = false)
 
             where TController : HttpController, new()
         {
+            if (string.IsNullOrWhiteSpace(route))
+            {
+                throw new ArgumentException($"'{nameof(route)}' cannot be null or whitespace.", nameof(route));
+            }
+
             return RegisterController(
                 route, 
                 new TController(), 
@@ -87,22 +147,31 @@ namespace Cherry
         }
 
         /// <summary>
-        /// 
+        /// Registers a controller for the given route.
         /// </summary>
-        /// <typeparam name="TController"></typeparam>
-        /// <param name="path"></param>
-        /// <param name="controller"></param>
-        /// <param name="overrideExistingRoute"></param>
-        /// <returns></returns>
+        /// <param name="route">The route which should be handled by the controller.</param>
+        /// <param name="controller">A instance which must be assignable to the type parameter <typeparamref name="TController"/>.</param>
+        /// <param name="overrideExistingRoute">Flag to indicate that a route (if already registered) should be overriden.</param>
+        /// <returns>The current <see cref="HttpServer"/> instance.</returns>
         public HttpServer RegisterController<TController>(
-            string path, 
+            string route, 
             TController controller,
             bool overrideExistingRoute = false)
 
             where TController : HttpController
         {
+            if (string.IsNullOrWhiteSpace(route))
+            {
+                throw new ArgumentException($"'{nameof(route)}' cannot be null or whitespace.", nameof(route));
+            }
+
+            if (controller is null)
+            {
+                throw new ArgumentNullException(nameof(controller));
+            }
+
             _router.RegisterController(
-                path,
+                route,
                 controller,
                 overrideExistingRoute);
 
@@ -114,7 +183,8 @@ namespace Cherry
         /// </summary>
         public void AutoRegisterControllers()
         {
-            AutoRegisterControllers(Assembly.GetCallingAssembly());
+            AutoRegisterControllers(
+                Assembly.GetCallingAssembly());
         }
 
         /// <summary>
@@ -122,7 +192,14 @@ namespace Cherry
         /// </summary>
         public void AutoRegisterControllers(Assembly assembly)
         {
-            ControllerDiscovery.FindAndRegisterControllers(assembly, _router);
+            if (assembly is null)
+            {
+                throw new ArgumentNullException(nameof(assembly));
+            }
+
+            ControllerDiscovery.FindAndRegisterControllers(
+                assembly,
+                _router);
         }
 
         public async Task RunAsync(CancellationToken cancellationToken = default)

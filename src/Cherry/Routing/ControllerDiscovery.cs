@@ -16,9 +16,9 @@ namespace Cherry.Routing
 
             foreach (var type in types)
             {
-                var attribute = type.GetCustomAttribute<RouteAttribute>();
+                var path = GetPathFromRouteAttribute(type);
 
-                if (attribute == null)
+                if (string.IsNullOrWhiteSpace(path))
                     continue;
 
                 var ctor = type.GetConstructor(Type.EmptyTypes);
@@ -30,9 +30,16 @@ namespace Cherry.Routing
                     continue;
 
                 router.RegisterController(
-                    attribute.Path.ToLower(),
+                    path,
                     instance);
             }
+        }
+
+        internal static string? GetPathFromRouteAttribute(Type type)
+        {
+            var attribute = type.GetCustomAttribute<RouteAttribute>();
+
+            return attribute?.Path?.ToLower();
         }
     }
 }

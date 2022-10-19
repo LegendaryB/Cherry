@@ -12,12 +12,11 @@ namespace Cherry.ConsoleApp
         static async Task Main()
         {
             var server = new HttpServer(NullLogger<HttpServer>.Instance, "http://localhost:8081/")
-                .RegisterController<HelloWorldController>("/api/v1/helloworld")
-                .RegisterController<HelloWorldController>("/api/v2")
-                .RegisterController("/api/v3", async (ctx) =>
+                .RegisterController<HelloWorldController>()
+                .RegisterController("/api/v2", async (ctx) =>
                 {
                     await ctx.Response.AnswerWithStatusCodeAsync(
-                        "Hello handler",
+                        "API v2 says hello!",
                         HttpStatusCode.OK);
                 });
 
@@ -25,7 +24,7 @@ namespace Cherry.ConsoleApp
         }
     }
 
-    [Route("/api/v1/helloWorld")]
+    [Route("/api/v1/helloworld")]
     public class HelloWorldController : HttpController
     {
         public override Task HandleGetAsync(HttpListenerContext ctx)
