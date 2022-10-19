@@ -34,7 +34,6 @@ namespace Cherry
             if (ctx.Request.HttpMethod == HttpMethod.Delete.ToString())
                 return HandleDeleteAsync(ctx.Request, ctx.Response);
 
-
             return SendDefaultResponse(ctx.Response);
         }
 
