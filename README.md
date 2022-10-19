@@ -7,11 +7,11 @@
 
 [![GitHub license](https://img.shields.io/github/license/legendaryb/cherry.svg?longCache=true&style=flat-square)](https://github.com/LegendaryB/Cherry/blob/main/LICENSE.txt)
 
-A self-hostable application to download files in a folder from Google Drive powered by Go.
+A simple http server implementation with a few goodies built around NET's [HttpListener](https://learn.microsoft.com/en-us/dotnet/api/system.net.httplistener?view=net-7.0).
 </div><br>
 
 ## 🎯 Features
-* Build around .NET's [HttpListener](https://learn.microsoft.com/en-us/dotnet/api/system.net.httplistener?view=net-7.0)
+* Built around .NET's [HttpListener](https://learn.microsoft.com/en-us/dotnet/api/system.net.httplistener?view=net-7.0)
 * Setup of the `HttpServer` instance via a fluent api
 * Lightweight. The only dependency is `Microsoft.Extensions.Logging.Abstractions` to make logging of internal events possible
 * Built-in `HttpRouter` is interchangeable by implementing the interface `IHttpRouter` and calling `HttpServer.Use<MyRouter>()`
