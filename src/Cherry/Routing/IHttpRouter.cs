@@ -2,7 +2,7 @@
 
 using System.Net;
 
-namespace Cherry
+namespace Cherry.Routing
 {
     public interface IHttpRouter
     {

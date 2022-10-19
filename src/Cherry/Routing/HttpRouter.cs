@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 using System.Net;
 
-namespace Cherry
+namespace Cherry.Routing
 {
     internal class HttpRouter : IHttpRouter
     {
