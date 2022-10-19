@@ -8,40 +8,39 @@ namespace Cherry
     {
         protected HttpController() { }
 
-        public virtual Task HandlePostAsync(HttpListenerContext ctx) =>
-            SendDefaultResponse(ctx);
+        public virtual Task HandlePostAsync(HttpListenerRequest req, HttpListenerResponse res) =>
+            SendDefaultResponse(res);
 
-        public virtual Task HandlePutAsync(HttpListenerContext ctx) =>
-            SendDefaultResponse(ctx);
+        public virtual Task HandlePutAsync(HttpListenerRequest req, HttpListenerResponse res) =>
+            SendDefaultResponse(res);
 
-        public virtual Task HandleGetAsync(HttpListenerContext ctx) =>
-            SendDefaultResponse(ctx);
+        public virtual Task HandleGetAsync(HttpListenerRequest req, HttpListenerResponse res) =>
+            SendDefaultResponse(res);
 
-        public virtual Task HandleDeleteAsync(HttpListenerContext ctx) =>
-            SendDefaultResponse(ctx);
+        public virtual Task HandleDeleteAsync(HttpListenerRequest req, HttpListenerResponse res) =>
+            SendDefaultResponse(res);
 
         internal virtual Task HandleAnyAsync(HttpListenerContext ctx)
         {
             if (ctx.Request.HttpMethod == HttpMethod.Post.ToString())
-                return HandlePostAsync(ctx);
+                return HandlePostAsync(ctx.Request, ctx.Response);
 
             if (ctx.Request.HttpMethod == HttpMethod.Put.ToString())
-                return HandlePutAsync(ctx);
+                return HandlePutAsync(ctx.Request, ctx.Response);
 
             if (ctx.Request.HttpMethod == HttpMethod.Get.ToString())
-                return HandleGetAsync(ctx);
+                return HandleGetAsync(ctx.Request, ctx.Response);
 
             if (ctx.Request.HttpMethod == HttpMethod.Delete.ToString())
-                return HandleDeleteAsync(ctx);
+                return HandleDeleteAsync(ctx.Request, ctx.Response);
 
 
-            return SendDefaultResponse(ctx);
+            return SendDefaultResponse(ctx.Response);
         }
 
-        protected static Task SendDefaultResponse(HttpListenerContext ctx)
+        protected static Task SendDefaultResponse(HttpListenerResponse res)
         {
-            ctx.Response.AnswerWithStatusCode(HttpStatusCode.NotImplemented);
-            return Task.CompletedTask;
+            return res.AnswerWithStatusCodeAsync(HttpStatusCode.NotImplemented);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Cherry.Extensions;
+using Cherry.Middleware;
 using Cherry.Routing;
 
 using Microsoft.Extensions.Logging;
@@ -36,6 +37,7 @@ namespace Cherry
         /// <summary>
         /// Allows to use a custom router implementation.
         /// </summary>
+        /// <returns>The current <see cref="HttpServer"/> instance.</returns>
         public HttpServer UseRouter<TRouter>()
             where TRouter : class, IHttpRouter, new()
         {
@@ -46,11 +48,58 @@ namespace Cherry
         /// Allows to use a custom router implementation.
         /// </summary>
         /// <param name="router">The <see cref="IHttpRouter"/> instance to use</param>
-        /// <exception cref="ArgumentNullException">When the <paramref name="router"/> is null.</exception>
+        /// <returns>The current <see cref="HttpServer"/> instance.</returns>
         public HttpServer UseRouter<TRouter>(TRouter router)
             where TRouter : class, IHttpRouter
         {
             _router = router ?? throw new ArgumentNullException(nameof(router));
+            return this;
+        }
+
+        /// <summary>
+        /// Allows to register a middleware used globally or bound to a specific route.
+        /// </summary>
+        /// <param name="route">The route on which the middleware should be registered.</param>
+        /// <returns>The current <see cref="HttpServer"/> instance.</returns>
+        public HttpServer RegisterMiddleware<TMiddleware>(string route = "*")
+            where TMiddleware : class, IMiddleware, new()
+        {
+            if (string.IsNullOrWhiteSpace(route))
+            {
+                throw new ArgumentException($"'{nameof(route)}' cannot be null or whitespace.", nameof(route));
+            }
+
+            return RegisterMiddleware(
+                new TMiddleware(),
+                route);
+        }
+
+        /// <summary>
+        /// Allows to register a middleware used globally or bound to a specific route.
+        /// </summary>
+        /// <param name="middleware"></param>
+        /// <param name="route">The route on which the middleware should be registered.</param>
+        /// <returns>The current <see cref="HttpServer"/> instance.</returns>
+        public HttpServer RegisterMiddleware<TMiddleware>(
+            TMiddleware middleware,
+            string route = "*")
+
+            where TMiddleware : class, IMiddleware
+        {
+            if (middleware is null)
+            {
+                throw new ArgumentNullException(nameof(middleware));
+            }
+
+            if (string.IsNullOrWhiteSpace(route))
+            {
+                throw new ArgumentException($"'{nameof(route)}' cannot be null or whitespace.", nameof(route));
+            }
+
+            _router.RegisterMiddleware(
+                route, 
+                middleware);
+
             return this;
         }
 
@@ -62,10 +111,8 @@ namespace Cherry
         public HttpServer RegisterController<TController>(bool overrideExistingRoute = false)
             where TController : HttpController, new()
         {
-            var controller = new TController();
-
             return RegisterController(
-                controller, 
+                new TController(), 
                 overrideExistingRoute);
         }
 
@@ -81,14 +128,14 @@ namespace Cherry
 
             where TController : HttpController
         {
-            var path = ControllerDiscovery.GetPathFromRouteAttribute(
+            var route = ControllerDiscovery.GetPathFromRouteAttribute(
                 typeof(TController));
 
-            if (string.IsNullOrWhiteSpace(path))
+            if (string.IsNullOrWhiteSpace(route))
                 throw new InvalidOperationException($"Failed to resolve controller route!");
 
             return RegisterController(
-                path,
+                route,
                 controller,
                 overrideExistingRoute);
         }
@@ -115,11 +162,9 @@ namespace Cherry
                 throw new ArgumentNullException(nameof(handler));
             }
 
-            var controller = new FuncAsHttpController(handler);
-
             return RegisterController(
                 route,
-                controller,
+                new FuncAsHttpController(handler),
                 overrideExistingRoute);
         }
 
@@ -202,6 +247,7 @@ namespace Cherry
                 _router);
         }
 
+        
         public async Task RunAsync(CancellationToken cancellationToken = default)
         {
             try
