@@ -1,5 +1,4 @@
-[![GitHub license](https://img.shields.io/github/license/legendaryb/cherry.svg?longCache=true&style=flat-square)](https://github.com/LegendaryB/Cherry/blob/main/LICENSE.txt)
-[![Nuget](https://img.shields.io/nuget/v/LegendaryB.Cherry.svg?style=flat-square)](https://www.nuget.org/packages/LegendaryB.Cherry/)
+# Cherry
 
 A simple http server implementation with a few goodies built around NET's [HttpListener](https://learn.microsoft.com/en-us/dotnet/api/system.net.httplistener?view=net-7.0).
 
