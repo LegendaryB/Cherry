@@ -44,6 +44,9 @@ namespace Cherry.Routing
             middlewares.AddRange(
                 GetMiddlewaresForRoute(route));
 
+            middlewares.AddRange(
+                GetMiddlewaresForRoute(route.TrimEnd('/')));
+
             foreach (var middleware in middlewares)
             {
                 await middleware.HandleRequestAsync(
@@ -72,7 +75,7 @@ namespace Cherry.Routing
 
                 route = route.ToLower();
 
-                if (!_routingTable.TryGetValue(route, out var controller))
+                if (!_routingTable.TryGetValue(route, out var controller) && !_routingTable.TryGetValue(route.TrimEnd('/'), out controller))
                 {
                     _logger.LogWarning($"Failed to resolve controller for route '{route}'.");
 
