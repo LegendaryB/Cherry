@@ -1,15 +1,7 @@
-<div align="center">
-
-<h1>Cherry</h1>
-
-[![forthebadge](https://forthebadge.com/images/badges/fuck-it-ship-it.svg)](https://forthebadge.com)
-[![forthebadge](https://forthebadge.com/images/badges/made-with-c-sharp.svg)](https://forthebadge.com)
-
 [![GitHub license](https://img.shields.io/github/license/legendaryb/cherry.svg?longCache=true&style=flat-square)](https://github.com/LegendaryB/Cherry/blob/main/LICENSE.txt)
 [![Nuget](https://img.shields.io/nuget/v/LegendaryB.Cherry.svg?style=flat-square)](https://www.nuget.org/packages/LegendaryB.Cherry/)
 
 A simple http server implementation with a few goodies built around NET's [HttpListener](https://learn.microsoft.com/en-us/dotnet/api/system.net.httplistener?view=net-7.0).
-</div><br>
 
 ## 🎯 Features
 * Built around .NET's [HttpListener](https://learn.microsoft.com/en-us/dotnet/api/system.net.httplistener?view=net-7.0)
