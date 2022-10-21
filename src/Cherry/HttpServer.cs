@@ -63,7 +63,7 @@ namespace Cherry
         /// <param name="route">The route on which the middleware should be registered.</param>
         /// <returns>The current <see cref="HttpServer"/> instance.</returns>
         public HttpServer RegisterMiddleware(
-            Func<HttpListenerRequest, HttpListenerResponse, Task> handler,
+            Func<HttpRequest, HttpResponse, Task> handler,
             string route = "*")
         {
             if (handler is null)
@@ -176,7 +176,7 @@ namespace Cherry
         /// <returns>The current <see cref="HttpServer"/> instance.</returns>
         public HttpServer RegisterController(
             string route,
-            Func<HttpListenerContext, Task> handler,
+            Func<HttpRequest, HttpResponse, Task> handler,
             bool overrideExistingRoute = false)
         {
             if (string.IsNullOrWhiteSpace(route))

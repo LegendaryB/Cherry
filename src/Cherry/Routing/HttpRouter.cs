@@ -62,6 +62,9 @@ namespace Cherry.Routing
             {
                 _logger.LogInformation($"{nameof(RouteAsync)} ENTER");
 
+                var req = new HttpRequest(ctx.Request);
+                var res = new HttpResponse(ctx.Response);
+
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
                 var route = ctx.Request.Url.LocalPath;
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
@@ -70,7 +73,7 @@ namespace Cherry.Routing
                 {
                     _logger.LogWarning($"'{nameof(route)}' cannot be null or whitespace.");
 
-                    await ctx.Response.AnswerWithStatusCodeAsync(HttpStatusCode.InternalServerError);
+                    await res.AnswerWithStatusCodeAsync(HttpStatusCode.InternalServerError);
                     return;
                 }
 
@@ -80,12 +83,9 @@ namespace Cherry.Routing
                 {
                     _logger.LogWarning($"Failed to resolve controller for route '{route}'.");
 
-                    await ctx.Response.AnswerWithStatusCodeAsync(HttpStatusCode.InternalServerError);
+                    await res.AnswerWithStatusCodeAsync(HttpStatusCode.InternalServerError);
                     return;
                 }
-
-                var req = new HttpRequest(ctx.Request);
-                var res = new HttpResponse(ctx.Response);
 
                 await InvokeMiddlewaresAsync(
                     route,

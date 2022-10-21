@@ -39,8 +39,8 @@ namespace Cherry.Routing
 
         protected static Task SendDefaultResponse(HttpResponse res)
         {
-            return Task.CompletedTask;
-            // return res.AnswerWithStatusCodeAsync(HttpStatusCode.NotImplemented);
+            return res.AnswerWithStatusCodeAsync(
+                HttpStatusCode.NotImplemented);
         }
     }
 }
