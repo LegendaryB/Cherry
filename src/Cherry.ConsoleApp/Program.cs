@@ -1,7 +1,11 @@
-﻿using Cherry.Middleware;
+﻿using Cherry.Extensions;
+using Cherry.Middleware;
 using Cherry.Routing;
 
 using Microsoft.Extensions.Logging.Abstractions;
+
+using System.Net;
+using System.Net.Mime;
 
 namespace Cherry.ConsoleApp
 {
@@ -17,9 +21,7 @@ namespace Cherry.ConsoleApp
             HttpRequest req,
             HttpResponse res)
         {
-            req.Body = null;
-
-            // res.ContentType = MediaTypeNames.Application.Json;
+            res.Response.ContentType = MediaTypeNames.Application.Json;
             return Task.CompletedTask;
         }
     }
@@ -28,12 +30,9 @@ namespace Cherry.ConsoleApp
     {
         public override Task HandleGetAsync(HttpRequest req, HttpResponse res)
         {
-            //return res.AnswerWithStatusCodeAsync(
-            //    "Hello World!",
-            //    HttpStatusCode.OK);
-            return base.HandleGetAsync(
-                req,
-                res);
+            return res.AnswerWithStatusCodeAsync(
+                "Hello World!",
+                HttpStatusCode.OK);
         }
     }
 

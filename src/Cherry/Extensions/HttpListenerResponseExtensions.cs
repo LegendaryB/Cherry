@@ -13,13 +13,13 @@ namespace Cherry.Extensions
         /// <param name="statusCode">The status code which should be send back to the client.</param>
         /// <returns></returns>
         public static async Task AnswerWithStatusCodeAsync(
-            this HttpListenerResponse res,
+            this HttpResponse res,
             string body,
             HttpStatusCode statusCode)
         {
             var bytes = Encoding.UTF8.GetBytes(body);
 
-            res.ContentEncoding = Encoding.UTF8;
+            res.Response.ContentEncoding = Encoding.UTF8;
 
             await AnswerWithStatusCodeAsync(
                 res,
@@ -28,11 +28,11 @@ namespace Cherry.Extensions
         }
 
         public static Task AnswerWithStatusCodeAsync(
-            this HttpListenerResponse res,
+            this HttpResponse res,
             HttpStatusCode statusCode)
         {
-            res.StatusCode = (int)statusCode;
-            res.Close();
+            res.Response.StatusCode = (int)statusCode;
+            res.Response.Close();
 
             return Task.CompletedTask;
         }
@@ -43,17 +43,17 @@ namespace Cherry.Extensions
         /// <param name="statusCode">The status code which should be send back to the client.</param>
         /// <returns></returns>
         public static async Task AnswerWithStatusCodeAsync(
-            this HttpListenerResponse res, 
+            this HttpResponse res, 
             byte[] body, 
             HttpStatusCode statusCode,
             string contentType = MediaTypeNames.Application.Octet)
         {
-            res.ContentType ??= contentType;
-            res.ContentLength64 = body.Length;
-            res.StatusCode = (int)statusCode;
+            res.Response.ContentType ??= contentType;
+            res.Response.ContentLength64 = body.Length;
+            res.Response.StatusCode = (int)statusCode;
 
-            await res.OutputStream.WriteAsync(body);
-            res.Close();
+            await res.Response.OutputStream.WriteAsync(body);
+            res.Response.Close();
         }
     }
 }
