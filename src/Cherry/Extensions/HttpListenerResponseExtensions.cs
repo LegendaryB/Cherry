@@ -11,7 +11,6 @@ namespace Cherry.Extensions
         /// </summary>
         /// <param name="body">The response body as a string. UTF-8 encoding is used. If another encoding is needed the <seealso cref="AnswerWithStatusCodeAsync(HttpListenerResponse, byte[], HttpStatusCode)"/> method should be used.</param>
         /// <param name="statusCode">The status code which should be send back to the client.</param>
-        /// <returns></returns>
         public static async Task AnswerWithStatusCodeAsync(
             this HttpResponse res,
             string body,
@@ -27,6 +26,11 @@ namespace Cherry.Extensions
                 statusCode);
         }
 
+        /// <summary>
+        /// Answers a request with the given status code and no response body.
+        /// </summary>
+        /// <param name="res"></param>
+        /// <param name="statusCode"></param>
         public static Task AnswerWithStatusCodeAsync(
             this HttpResponse res,
             HttpStatusCode statusCode)
@@ -41,7 +45,6 @@ namespace Cherry.Extensions
         /// Answers a request with the given status code and a response body.
         /// </summary>
         /// <param name="statusCode">The status code which should be send back to the client.</param>
-        /// <returns></returns>
         public static async Task AnswerWithStatusCodeAsync(
             this HttpResponse res, 
             byte[] body, 
