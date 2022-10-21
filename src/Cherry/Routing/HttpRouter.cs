@@ -36,8 +36,9 @@ namespace Cherry.Routing
         }
 
         private async Task InvokeMiddlewaresAsync(
-            HttpListenerContext ctx,
-            string route)
+            string route,
+            HttpRequest req,
+            HttpResponse res)
         {
             var middlewares = GetMiddlewaresForRoute(GLOBAL_MIDDLEWARE_KEY);
 
@@ -50,8 +51,8 @@ namespace Cherry.Routing
             foreach (var middleware in middlewares)
             {
                 await middleware.HandleRequestAsync(
-                    ctx.Request, 
-                    ctx.Response);
+                    req, 
+                    res);
             }
         }
 
@@ -83,11 +84,17 @@ namespace Cherry.Routing
                     return;
                 }
 
-                await InvokeMiddlewaresAsync(
-                    ctx,
-                    route);
+                var req = new HttpRequest(ctx.Request);
+                var res = new HttpResponse(ctx.Response);
 
-                await controller.HandleAnyAsync(ctx);
+                await InvokeMiddlewaresAsync(
+                    route,
+                    req,
+                    res);
+
+                await controller.HandleAnyAsync(
+                    req,
+                    res);
             }
             finally
             {

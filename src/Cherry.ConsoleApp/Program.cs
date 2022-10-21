@@ -1,11 +1,7 @@
-﻿using Cherry.Extensions;
-using Cherry.Middleware;
+﻿using Cherry.Middleware;
 using Cherry.Routing;
 
 using Microsoft.Extensions.Logging.Abstractions;
-
-using System.Net;
-using System.Net.Mime;
 
 namespace Cherry.ConsoleApp
 {
@@ -18,30 +14,37 @@ namespace Cherry.ConsoleApp
     public class JsonContentTypeMiddleware : IMiddleware
     {
         public Task HandleRequestAsync(
-            HttpListenerRequest req,
-            HttpListenerResponse res)
+            HttpRequest req,
+            HttpResponse res)
         {
-            res.ContentType = MediaTypeNames.Application.Json;
+            req.Body = null;
+
+            // res.ContentType = MediaTypeNames.Application.Json;
             return Task.CompletedTask;
         }
     }
 
     public class HelloWorldController : HttpController
     {
-        public override Task HandleGetAsync(HttpListenerRequest req, HttpListenerResponse res)
+        public override Task HandleGetAsync(HttpRequest req, HttpResponse res)
         {
-            return res.AnswerWithStatusCodeAsync(
-                "Hello World!",
-                HttpStatusCode.OK);
+            //return res.AnswerWithStatusCodeAsync(
+            //    "Hello World!",
+            //    HttpStatusCode.OK);
+            return base.HandleGetAsync(
+                req,
+                res);
         }
     }
 
     [Route("/api/v1/users")]
     public class UserController : HttpController
     {
-        public override Task HandleGetAsync(HttpListenerRequest req, HttpListenerResponse res)
+        public override Task HandleGetAsync(HttpRequest req, HttpResponse res)
         {
-            return base.HandleGetAsync(req, res);
+            return base.HandleGetAsync(
+                req,
+                res);
         }
     }
 
