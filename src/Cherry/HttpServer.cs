@@ -4,6 +4,7 @@ using Cherry.Routing;
 
 using Microsoft.Extensions.Logging;
 
+using System.Diagnostics.Metrics;
 using System.Net;
 using System.Reflection;
 
@@ -27,12 +28,34 @@ namespace Cherry
 
         public HttpServer(
             ILogger logger,
+            HttpListener? httpListener,
             params string[] prefixes)
 
-            : this(logger, httpListener: null)
+            : this (logger, httpListener)
         {
-            _httpListener.Prefixes.AddRange(prefixes.ToArray());
+            _httpListener.Prefixes.AddRange(prefixes);
         }
+
+        public HttpServer(
+            ILogger logger,
+            HttpListener? httpListener,
+            IEnumerable<HttpController> controllers,
+            params string[] prefixes)
+
+            : this (logger, httpListener, prefixes)
+        {
+            foreach (var controller in controllers)
+                RegisterController(controller);
+        }
+
+        public HttpServer(ILogger logger)
+            : this (logger, httpListener: null) { }
+
+        public HttpServer(ILogger logger, params string[] prefixes)
+            : this(logger, httpListener: null, prefixes) { }
+
+        public HttpServer(ILogger logger, IEnumerable<HttpController> controllers, params string[] prefixes)
+            : this(logger, httpListener: null, controllers: controllers, prefixes) { }
 
         /// <summary>
         /// Allows to use a custom router implementation.
@@ -155,10 +178,7 @@ namespace Cherry
 
             where TController : HttpController
         {
-            var route = ControllerDiscovery.GetPathFromRouteAttribute(
-                typeof(TController));
-
-            if (string.IsNullOrWhiteSpace(route))
+            if (!HttpControllerDiscovery.TryGetControllerRouteFromAttribute(typeof(TController), out var route))
                 throw new InvalidOperationException($"Failed to resolve controller route!");
 
             return RegisterController(
@@ -250,14 +270,6 @@ namespace Cherry
             return this;
         }
 
-        /// <summary>
-        /// Auto registers all types inheriting from <see cref="HttpController"/> and using a <see cref="RouteAttribute"/> to declare a path.
-        /// </summary>
-        public void AutoRegisterControllers()
-        {
-            AutoRegisterControllers(
-                Assembly.GetCallingAssembly());
-        }
 
         /// <summary>
         /// Auto registers all types inheriting from <see cref="HttpController"/> and using a <see cref="RouteAttribute"/> to declare a path.
@@ -269,12 +281,54 @@ namespace Cherry
                 throw new ArgumentNullException(nameof(assembly));
             }
 
-            ControllerDiscovery.FindAndRegisterControllers(
-                assembly,
-                _router);
+            var controllerTypes = HttpControllerDiscovery.FindControllerTypes(assembly);
+
+            foreach (var controllerType in controllerTypes)
+            {
+                if (!HttpControllerDiscovery.TryGetControllerRouteFromAttribute(controllerType, out var path))
+                    continue;
+
+                var ctor = controllerType.GetConstructor(Type.EmptyTypes);
+
+                if (ctor == null)
+                    continue;
+
+                if (Activator.CreateInstance(controllerType) is not HttpController instance)
+                    continue;
+
+                _router.RegisterController(
+                    path,
+                    instance);
+            }
         }
 
-        
+
+        /// <summary>
+        /// Auto registers all types inheriting from <see cref="HttpController"/> and using a <see cref="RouteAttribute"/> to declare a path.
+        /// </summary>
+        public void AutoRegisterControllers()
+        {
+            AutoRegisterControllers(Assembly.GetCallingAssembly());
+        }
+
+
+        /// <summary>
+        /// Auto registers all types inheriting from <see cref="HttpController"/> and using a <see cref="RouteAttribute"/> to declare a path.
+        /// </summary>
+        public void AutoRegisterControllers(IEnumerable<Assembly> assemblies)
+        {
+            if (assemblies is null)
+            {
+                throw new ArgumentNullException(nameof(assemblies));
+            }
+
+            foreach (var assembly in assemblies)
+            {
+                AutoRegisterControllers(assembly);
+            }
+        }
+
+
         public async Task RunAsync(CancellationToken cancellationToken = default)
         {
             try
