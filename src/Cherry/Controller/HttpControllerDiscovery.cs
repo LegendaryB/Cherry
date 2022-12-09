@@ -4,7 +4,7 @@ namespace Cherry.Controller
 {
     internal static class HttpControllerDiscovery
     {
-        private static readonly Type _controllerType = typeof(HttpController);
+        private static readonly Type _controllerType = typeof(IHttpController);
 
         internal static IEnumerable<Type> FindControllerTypes(Assembly assembly)
         {
