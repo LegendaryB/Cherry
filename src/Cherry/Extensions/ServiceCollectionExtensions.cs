@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Cherry.Controller;
+
+using Microsoft.Extensions.DependencyInjection;
 
 using System.Reflection;
 
