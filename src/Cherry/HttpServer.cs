@@ -289,62 +289,62 @@ namespace Cherry
         }
 
 
-        /// <summary>
-        /// Auto registers all types inheriting from <see cref="HttpController"/> and using a <see cref="RouteAttribute"/> to declare a path.
-        /// </summary>
-        public void AutoRegisterControllers(Assembly assembly)
-        {
-            if (assembly is null)
-            {
-                throw new ArgumentNullException(nameof(assembly));
-            }
+        ///// <summary>
+        ///// Auto registers all types inheriting from <see cref="HttpController"/> and using a <see cref="RouteAttribute"/> to declare a path.
+        ///// </summary>
+        //public void AutoRegisterControllers(Assembly assembly)
+        //{
+        //    if (assembly is null)
+        //    {
+        //        throw new ArgumentNullException(nameof(assembly));
+        //    }
 
-            var controllerTypes = HttpControllerDiscovery.FindControllerTypes(assembly);
+        //    var controllerTypes = HttpControllerDiscovery.FindControllerTypes(assembly);
 
-            foreach (var controllerType in controllerTypes)
-            {
-                if (!HttpControllerDiscovery.TryGetControllerRouteFromAttribute(controllerType, out var path))
-                    continue;
+        //    foreach (var controllerType in controllerTypes)
+        //    {
+        //        if (!HttpControllerDiscovery.TryGetControllerRouteFromAttribute(controllerType, out var path))
+        //            continue;
 
-                var ctor = controllerType.GetConstructor(Type.EmptyTypes);
+        //        var ctor = controllerType.GetConstructor(Type.EmptyTypes);
 
-                if (ctor == null)
-                    continue;
+        //        if (ctor == null)
+        //            continue;
 
-                if (Activator.CreateInstance(controllerType) is not HttpController instance)
-                    continue;
+        //        if (Activator.CreateInstance(controllerType) is not HttpController instance)
+        //            continue;
 
-                _router.RegisterController(
-                    path,
-                    instance);
-            }
-        }
-
-
-        /// <summary>
-        /// Auto registers all types inheriting from <see cref="HttpController"/> and using a <see cref="RouteAttribute"/> to declare a path.
-        /// </summary>
-        public void AutoRegisterControllers()
-        {
-            AutoRegisterControllers(Assembly.GetCallingAssembly());
-        }
+        //        _router.RegisterController(
+        //            path,
+        //            instance);
+        //    }
+        //}
 
 
-        /// <summary>
-        /// Auto registers all types inheriting from <see cref="HttpController"/> and using a <see cref="RouteAttribute"/> to declare a path.
-        /// </summary>
-        public void AutoRegisterControllers(IEnumerable<Assembly> assemblies)
-        {
-            if (assemblies is null)
-            {
-                throw new ArgumentNullException(nameof(assemblies));
-            }
+        ///// <summary>
+        ///// Auto registers all types inheriting from <see cref="HttpController"/> and using a <see cref="RouteAttribute"/> to declare a path.
+        ///// </summary>
+        //public void AutoRegisterControllers()
+        //{
+        //    AutoRegisterControllers(Assembly.GetCallingAssembly());
+        //}
 
-            foreach (var assembly in assemblies)
-            {
-                AutoRegisterControllers(assembly);
-            }
-        }
+
+        ///// <summary>
+        ///// Auto registers all types inheriting from <see cref="HttpController"/> and using a <see cref="RouteAttribute"/> to declare a path.
+        ///// </summary>
+        //public void AutoRegisterControllers(IEnumerable<Assembly> assemblies)
+        //{
+        //    if (assemblies is null)
+        //    {
+        //        throw new ArgumentNullException(nameof(assemblies));
+        //    }
+
+        //    foreach (var assembly in assemblies)
+        //    {
+        //        AutoRegisterControllers(assembly);
+        //    }
+        //}
 
 
         public async Task RunAsync(CancellationToken cancellationToken = default)
