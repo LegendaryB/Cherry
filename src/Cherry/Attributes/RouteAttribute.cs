@@ -1,4 +1,4 @@
-﻿namespace Cherry.Routing
+﻿namespace Cherry
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class RouteAttribute : Attribute

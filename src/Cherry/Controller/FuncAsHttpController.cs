@@ -1,4 +1,4 @@
-﻿namespace Cherry.Routing
+﻿namespace Cherry.Controller
 {
     internal class FuncAsHttpController : HttpController
     {

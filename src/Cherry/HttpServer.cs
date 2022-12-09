@@ -1,10 +1,11 @@
-﻿using Cherry.Extensions;
+﻿using Cherry.Controller;
+using Cherry.Extensions;
 using Cherry.Middleware;
 using Cherry.Routing;
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
-using System.Diagnostics.Metrics;
 using System.Net;
 using System.Reflection;
 
@@ -12,50 +13,67 @@ namespace Cherry
 {
     public class HttpServer
     {
-        private readonly HttpListener _httpListener;
-        private readonly ILogger _logger;
+        private readonly HttpListener _listener;
+        private readonly ILogger<HttpServer> _logger;
 
         private IHttpRouter _router;
 
         public HttpServer(
-            ILogger logger,
-            HttpListener? httpListener)
+            ILoggerFactory? loggerFactory,
+            HttpListener? listener)
         {
-            _logger = logger;
-            _httpListener = httpListener ?? (new());
-            _router = new HttpRouter(logger);
+            loggerFactory ??= NullLoggerFactory.Instance;
+
+            _logger = loggerFactory.CreateLogger<HttpServer>();
+
+            _listener = listener ?? (new());
+
+            _router = new HttpRouter(
+                loggerFactory.CreateLogger<HttpRouter>());
         }
 
         public HttpServer(
-            ILogger logger,
-            HttpListener? httpListener,
-            params string[] prefixes)
+            ILoggerFactory? loggerFactory,
+            params string[] listenerPrefixes)
 
-            : this (logger, httpListener)
+            : this(loggerFactory, listener: null)
         {
-            _httpListener.Prefixes.AddRange(prefixes);
+            _listener.Prefixes.AddRange(listenerPrefixes);
         }
 
-        public HttpServer(
-            ILogger logger,
-            HttpListener? httpListener,
-            IEnumerable<HttpController> controllers,
-            params string[] prefixes)
-
-            : this (logger, httpListener, prefixes)
+        public HttpServer(params string[] listenerPrefixes)
+            : this(loggerFactory: null, listener: null)
         {
-            foreach (var controller in controllers)
-                RegisterController(controller);
+            _listener.Prefixes.AddRange(listenerPrefixes);
         }
 
-        public HttpServer(ILogger logger)
-            : this (logger, httpListener: null) { }
+        //public HttpServer(
+        //    ILoggerFactory? loggerFactory,
+        //    HttpListener? listener,
+        //    IEnumerable<HttpController>
 
-        public HttpServer(ILogger logger, params string[] prefixes)
-            : this(logger, httpListener: null, prefixes) { }
+        //public HttpServer(
+        //    ILoggerFactory? loggerFactory,
+        //    HttpListener? httpListener,
+        //    IEnumerable<HttpController> controllers)
 
-        public HttpServer(ILogger logger, IEnumerable<HttpController> controllers, params string[] prefixes)
-            : this(logger, httpListener: null, controllers: controllers, prefixes) { }
+        //    : this(loggerFactory, httpListener, prefixes)
+        //{
+        //    foreach (var controller in controllers)
+        //        RegisterController(controller);
+        //}
+
+        //public HttpServer()
+        //    : this(null, null) { }
+
+        //public HttpServer(HttpListener listener)
+        //    : this(null, listener) { }
+
+        //public HttpServer(ILogger logger, params string[] prefixes)
+        //    : this(logger, httpListener: null, prefixes) { }
+
+        //public HttpServer(ILogger logger, IEnumerable<HttpController> controllers, params string[] prefixes)
+        //    : this(logger, httpListener: null, controllers: controllers, prefixes) { }
 
         /// <summary>
         /// Allows to use a custom router implementation.
@@ -335,13 +353,13 @@ namespace Cherry
             {
                 _logger.LogInformation($"{nameof(RunAsync)} ENTER");
 
-                _httpListener.Start();
+                _listener.Start();
 
                 while (!cancellationToken.IsCancellationRequested)
                 {
                     try
                     {
-                        var ctx = await _httpListener.GetContextAsync();
+                        var ctx = await _listener.GetContextAsync();
                         await _router.RouteAsync(ctx);
                     }
                     catch (Exception ex)
@@ -350,7 +368,7 @@ namespace Cherry
                     }
                 }
 
-                _httpListener.Stop();
+                _listener.Stop();
             }
             catch (Exception ex)
             {

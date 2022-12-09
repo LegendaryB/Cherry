@@ -1,4 +1,5 @@
-﻿using Cherry.Extensions;
+﻿using Cherry.Controller;
+using Cherry.Extensions;
 using Cherry.Middleware;
 using Cherry.Routing;
 
@@ -28,7 +29,7 @@ namespace Cherry.ConsoleApp
 
     public class HelloWorldController : HttpController
     {
-        public override Task HandleGetAsync(HttpRequest req, HttpResponse res)
+        public override Task GetAsync(HttpRequest req, HttpResponse res)
         {
             return res.AnswerWithStatusCodeAsync(
                 "Hello World!",
@@ -39,9 +40,9 @@ namespace Cherry.ConsoleApp
     [Route("/api/v1/users")]
     public class UserController : HttpController
     {
-        public override Task HandleGetAsync(HttpRequest req, HttpResponse res)
+        public override Task GetAsync(HttpRequest req, HttpResponse res)
         {
-            return base.HandleGetAsync(
+            return base.GetAsync(
                 req,
                 res);
         }

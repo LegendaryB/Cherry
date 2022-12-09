@@ -1,4 +1,5 @@
-﻿using Cherry.Extensions;
+﻿using Cherry.Controller;
+using Cherry.Extensions;
 using Cherry.Middleware;
 
 using Microsoft.Extensions.Logging;

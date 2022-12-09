@@ -1,8 +1,6 @@
-﻿using Cherry.Routing;
+﻿using System.Reflection;
 
-using System.Reflection;
-
-namespace Cherry
+namespace Cherry.Controller
 {
     internal static class HttpControllerDiscovery
     {
