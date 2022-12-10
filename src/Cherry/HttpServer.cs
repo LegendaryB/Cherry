@@ -12,7 +12,9 @@ namespace Cherry
 
         private IHttpRouter _router;
 
-        public HttpServer(ILoggerFactory? loggerFactory, HttpListener listener)
+        public HttpServer(
+            ILoggerFactory? loggerFactory,
+            HttpListener listener)
         {
             if (listener is null)
             {
@@ -38,11 +40,6 @@ namespace Cherry
         {
         }
 
-        public HttpServer(Func<HttpListener> listenerFactory)
-            : this(loggerFactory: null, listenerFactory.Invoke())
-        {
-        }
-
         public HttpServer(
             ILoggerFactory? loggerFactory,
             Func<HttpListener> listenerFactory)
@@ -51,53 +48,70 @@ namespace Cherry
         {
         }
 
+        public HttpServer(Func<HttpListener> listenerFactory)
+            : this(loggerFactory: null, listenerFactory.Invoke())
+        {
+        }
+
         public HttpServer(
-            ILoggerFactory? loggerFactory, 
-            HttpListener listener,
+            ILoggerFactory? loggerFactory,
+            params string[] listenerPrefixes)
+
+            : this(loggerFactory, CreateHttpListenerWithPrefixes(listenerPrefixes))
+        {
+
+        }
+
+        public HttpServer(params string[] listenerPrefixes)
+            : this(loggerFactory: null, listenerPrefixes)
+        {
+        }
+
+        public HttpServer(
+            ILoggerFactory? loggerFactory,
+            CherryConfiguration configuration,
             IEnumerable<HttpController> controllers)
 
-            : this (loggerFactory: loggerFactory, listener: listener)
+            : this(loggerFactory, CreateHttpListenerWithPrefixes(configuration.ListenerPrefixes))
         {
             foreach (var controller in controllers)
                 RegisterController(controller);
         }
 
         public HttpServer(
-            ILoggerFactory? loggerFactory,
-            Func<HttpListener> listenerFactory,
+            CherryConfiguration configuration,
             IEnumerable<HttpController> controllers)
 
-            : this(loggerFactory: loggerFactory, listener: listenerFactory.Invoke(), controllers)
+            : this(loggerFactory: null, configuration, controllers: controllers)
         {
         }
 
         public HttpServer(
             ILoggerFactory? loggerFactory,
-            HttpListener listener,
+            CherryConfiguration configuration,
             IEnumerable<IMiddleware> middlewares)
 
-            : this(loggerFactory: loggerFactory, listener: listener)
+            : this(loggerFactory, CreateHttpListenerWithPrefixes(configuration.ListenerPrefixes))
         {
             foreach (var middleware in middlewares)
                 RegisterMiddleware(middleware);
         }
 
         public HttpServer(
-            ILoggerFactory? loggerFactory,
-            Func<HttpListener> listenerFactory,
+            CherryConfiguration configuration,
             IEnumerable<IMiddleware> middlewares)
 
-            : this(loggerFactory: loggerFactory, listener: listenerFactory.Invoke(), middlewares)
+            : this(loggerFactory: null, configuration, middlewares: middlewares)
         {
         }
 
         public HttpServer(
             ILoggerFactory? loggerFactory,
-            HttpListener listener,
+            CherryConfiguration configuration,
             IEnumerable<HttpController> controllers,
             IEnumerable<IMiddleware> middlewares)
 
-            : this(loggerFactory: loggerFactory, listener: listener)
+            : this(loggerFactory, CreateHttpListenerWithPrefixes(configuration.ListenerPrefixes))
         {
             foreach (var controller in controllers)
                 RegisterController(controller);
@@ -107,13 +121,22 @@ namespace Cherry
         }
 
         public HttpServer(
-            ILoggerFactory? loggerFactory,
-            Func<HttpListener> listenerFactory,
+            CherryConfiguration configuration,
             IEnumerable<HttpController> controllers,
             IEnumerable<IMiddleware> middlewares)
 
-            : this(loggerFactory: loggerFactory, listener: listenerFactory.Invoke(), controllers, middlewares)
+            : this(loggerFactory: null, configuration, controllers: controllers, middlewares: middlewares)
         {
+        }
+
+        private static HttpListener CreateHttpListenerWithPrefixes(IEnumerable<string> listenerPrefixes)
+        {
+            var listener = new HttpListener();
+
+            foreach (var prefix in listenerPrefixes)
+                listener.Prefixes.Add(prefix);
+
+            return listener;
         }
 
 
