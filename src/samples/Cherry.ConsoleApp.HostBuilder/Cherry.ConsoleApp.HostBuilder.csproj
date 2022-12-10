@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Cherry\Cherry.csproj" />
+    <ProjectReference Include="..\..\Microsoft.Extensions\Cherry.Extensions.DependencyInjection\Cherry.Extensions.DependencyInjection.csproj" />
   </ItemGroup>
 
 </Project>
