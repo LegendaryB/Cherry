@@ -1,4 +1,4 @@
-﻿namespace Cherry.Controller
+﻿namespace Cherry
 {
     internal class FuncAsHttpController : HttpController
     {

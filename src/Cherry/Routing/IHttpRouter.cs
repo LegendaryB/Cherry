@@ -1,9 +1,6 @@
-﻿using Cherry.Controller;
-using Cherry.Middleware;
+﻿using System.Net;
 
-using System.Net;
-
-namespace Cherry.Routing
+namespace Cherry
 {
     public interface IHttpRouter
     {

@@ -1,9 +1,4 @@
-﻿using Cherry.Controller;
-using Cherry.Extensions;
-using Cherry.Middleware;
-using Cherry.Routing;
-
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
 using System.Net;
@@ -17,62 +12,110 @@ namespace Cherry
 
         private IHttpRouter _router;
 
-        public HttpServer(
-            ILoggerFactory? loggerFactory,
-            HttpListener? listener)
+        public HttpServer(ILoggerFactory? loggerFactory, HttpListener listener)
         {
+            if (listener is null)
+            {
+                throw new ArgumentNullException(nameof(listener));
+            }
+
+            if (!listener.Prefixes.Any())
+            {
+                throw new ArgumentException($"'{nameof(listener.Prefixes)}' must contain at least one prefix.");
+            }
+
+            _listener = listener;
+
             loggerFactory ??= NullLoggerFactory.Instance;
 
             _logger = loggerFactory.CreateLogger<HttpServer>();
-
-            _listener = listener ?? (new());
-
             _router = new HttpRouter(
                 loggerFactory.CreateLogger<HttpRouter>());
         }
 
+        public HttpServer(HttpListener listener)
+            : this(loggerFactory: null, listener)
+        {
+        }
+
+        public HttpServer(Func<HttpListener> listenerFactory)
+            : this(loggerFactory: null, listenerFactory.Invoke())
+        {
+        }
+
         public HttpServer(
             ILoggerFactory? loggerFactory,
-            params string[] listenerPrefixes)
+            Func<HttpListener> listenerFactory)
 
-            : this(loggerFactory, listener: null)
+            : this(loggerFactory, listenerFactory.Invoke())
         {
-            _listener.Prefixes.AddRange(listenerPrefixes);
         }
 
-        public HttpServer(params string[] listenerPrefixes)
-            : this(loggerFactory: null, listener: null)
+        public HttpServer(
+            ILoggerFactory? loggerFactory, 
+            HttpListener listener,
+            IEnumerable<HttpController> controllers)
+
+            : this (loggerFactory: loggerFactory, listener: listener)
         {
-            _listener.Prefixes.AddRange(listenerPrefixes);
+            foreach (var controller in controllers)
+                RegisterController(controller);
         }
 
-        //public HttpServer(
-        //    ILoggerFactory? loggerFactory,
-        //    HttpListener? listener,
-        //    IEnumerable<HttpController>
+        public HttpServer(
+            ILoggerFactory? loggerFactory,
+            Func<HttpListener> listenerFactory,
+            IEnumerable<HttpController> controllers)
 
-        //public HttpServer(
-        //    ILoggerFactory? loggerFactory,
-        //    HttpListener? httpListener,
-        //    IEnumerable<HttpController> controllers)
+            : this(loggerFactory: loggerFactory, listener: listenerFactory.Invoke(), controllers)
+        {
+        }
 
-        //    : this(loggerFactory, httpListener, prefixes)
-        //{
-        //    foreach (var controller in controllers)
-        //        RegisterController(controller);
-        //}
+        public HttpServer(
+            ILoggerFactory? loggerFactory,
+            HttpListener listener,
+            IEnumerable<IMiddleware> middlewares)
 
-        //public HttpServer()
-        //    : this(null, null) { }
+            : this(loggerFactory: loggerFactory, listener: listener)
+        {
+            foreach (var middleware in middlewares)
+                RegisterMiddleware(middleware);
+        }
 
-        //public HttpServer(HttpListener listener)
-        //    : this(null, listener) { }
+        public HttpServer(
+            ILoggerFactory? loggerFactory,
+            Func<HttpListener> listenerFactory,
+            IEnumerable<IMiddleware> middlewares)
 
-        //public HttpServer(ILogger logger, params string[] prefixes)
-        //    : this(logger, httpListener: null, prefixes) { }
+            : this(loggerFactory: loggerFactory, listener: listenerFactory.Invoke(), middlewares)
+        {
+        }
 
-        //public HttpServer(ILogger logger, IEnumerable<HttpController> controllers, params string[] prefixes)
-        //    : this(logger, httpListener: null, controllers: controllers, prefixes) { }
+        public HttpServer(
+            ILoggerFactory? loggerFactory,
+            HttpListener listener,
+            IEnumerable<HttpController> controllers,
+            IEnumerable<IMiddleware> middlewares)
+
+            : this(loggerFactory: loggerFactory, listener: listener)
+        {
+            foreach (var controller in controllers)
+                RegisterController(controller);
+
+            foreach (var middleware in middlewares)
+                RegisterMiddleware(middleware);
+        }
+
+        public HttpServer(
+            ILoggerFactory? loggerFactory,
+            Func<HttpListener> listenerFactory,
+            IEnumerable<HttpController> controllers,
+            IEnumerable<IMiddleware> middlewares)
+
+            : this(loggerFactory: loggerFactory, listener: listenerFactory.Invoke(), controllers, middlewares)
+        {
+        }
+
 
         /// <summary>
         /// Allows to use a custom router implementation.
@@ -195,7 +238,7 @@ namespace Cherry
 
             where TController : HttpController
         {
-            if (!HttpControllerDiscovery.TryGetControllerRouteFromAttribute(typeof(TController), out var route))
+            if (!TypeDiscovery.TryGetControllerRouteFromAttribute(typeof(TController), out var route))
                 throw new InvalidOperationException($"Failed to resolve controller route!");
 
             return RegisterController(
@@ -286,64 +329,6 @@ namespace Cherry
 
             return this;
         }
-
-
-        ///// <summary>
-        ///// Auto registers all types inheriting from <see cref="HttpController"/> and using a <see cref="RouteAttribute"/> to declare a path.
-        ///// </summary>
-        //public void AutoRegisterControllers(Assembly assembly)
-        //{
-        //    if (assembly is null)
-        //    {
-        //        throw new ArgumentNullException(nameof(assembly));
-        //    }
-
-        //    var controllerTypes = HttpControllerDiscovery.FindControllerTypes(assembly);
-
-        //    foreach (var controllerType in controllerTypes)
-        //    {
-        //        if (!HttpControllerDiscovery.TryGetControllerRouteFromAttribute(controllerType, out var path))
-        //            continue;
-
-        //        var ctor = controllerType.GetConstructor(Type.EmptyTypes);
-
-        //        if (ctor == null)
-        //            continue;
-
-        //        if (Activator.CreateInstance(controllerType) is not HttpController instance)
-        //            continue;
-
-        //        _router.RegisterController(
-        //            path,
-        //            instance);
-        //    }
-        //}
-
-
-        ///// <summary>
-        ///// Auto registers all types inheriting from <see cref="HttpController"/> and using a <see cref="RouteAttribute"/> to declare a path.
-        ///// </summary>
-        //public void AutoRegisterControllers()
-        //{
-        //    AutoRegisterControllers(Assembly.GetCallingAssembly());
-        //}
-
-
-        ///// <summary>
-        ///// Auto registers all types inheriting from <see cref="HttpController"/> and using a <see cref="RouteAttribute"/> to declare a path.
-        ///// </summary>
-        //public void AutoRegisterControllers(IEnumerable<Assembly> assemblies)
-        //{
-        //    if (assemblies is null)
-        //    {
-        //        throw new ArgumentNullException(nameof(assemblies));
-        //    }
-
-        //    foreach (var assembly in assemblies)
-        //    {
-        //        AutoRegisterControllers(assembly);
-        //    }
-        //}
 
 
         public async Task RunAsync(CancellationToken cancellationToken = default)

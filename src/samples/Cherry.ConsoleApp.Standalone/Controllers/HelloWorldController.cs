@@ -1,7 +1,4 @@
-﻿using Cherry.Controller;
-using Cherry.Extensions;
-
-using System.Net;
+﻿using System.Net;
 
 namespace Cherry.ConsoleApp
 {

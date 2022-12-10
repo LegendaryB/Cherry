@@ -1,4 +1,4 @@
-﻿namespace Cherry.Middleware
+﻿namespace Cherry
 {
     public interface IMiddleware
     {

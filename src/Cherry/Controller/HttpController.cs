@@ -1,10 +1,8 @@
-﻿using Cherry.Extensions;
+﻿using System.Net;
 
-using System.Net;
-
-namespace Cherry.Controller
+namespace Cherry
 {
-    public abstract class HttpController : IHttpController
+    public abstract class HttpController
     {
         private readonly Dictionary<HttpMethod, Func<HttpRequest, HttpResponse, Task>> _httpMethodToDelegateMap;
 

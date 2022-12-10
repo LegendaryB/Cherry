@@ -2,7 +2,7 @@
 using System.Net.Mime;
 using System.Text;
 
-namespace Cherry.Extensions
+namespace Cherry
 {
     public static class HttpListenerResponseExtensions
     {
@@ -23,7 +23,8 @@ namespace Cherry.Extensions
             await AnswerWithStatusCodeAsync(
                 res,
                 bytes,
-                statusCode);
+                statusCode,
+                MediaTypeNames.Text.Plain);
         }
 
         /// <summary>

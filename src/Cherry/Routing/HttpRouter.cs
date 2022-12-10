@@ -1,12 +1,8 @@
-﻿using Cherry.Controller;
-using Cherry.Extensions;
-using Cherry.Middleware;
-
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 
 using System.Net;
 
-namespace Cherry.Routing
+namespace Cherry
 {
     internal class HttpRouter : IHttpRouter
     {
@@ -134,6 +130,8 @@ namespace Cherry.Routing
             try
             {
                 _logger.LogInformation($"{nameof(RegisterController)} ENTER");
+
+                route = route.ToLower();
 
                 if (_routingTable.ContainsKey(route) && !overrideExistingRoute)
                     throw new ArgumentException($"There is already a controller registered for the route '{route}'!");

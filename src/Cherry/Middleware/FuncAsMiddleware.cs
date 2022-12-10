@@ -1,4 +1,4 @@
-﻿namespace Cherry.Middleware
+﻿namespace Cherry
 {
     internal class FuncAsMiddleware : IMiddleware
     {
